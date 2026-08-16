@@ -2,65 +2,80 @@ using UnityEngine;
 
 public class PressurePlate : MonoBehaviour
 {
-    public bool isUnlocked = false;
-    public float minimumMass = 5f;
+    public float minimumMass = 8f;
     public SlidingDoor slidingDoor;
+    public bool isUnlocked = true;
     private Renderer plateRenderer;
+    private bool isPressed = false;
 
     void Start()
     {
         plateRenderer = GetComponent<Renderer>();
+        if (plateRenderer != null)
+        {
+            plateRenderer.material.color = Color.green;
+        }
+    }
+
+    void Update()
+    {
+        if (!isUnlocked)
+        {
+            return;
+        }
+
+        if (slidingDoor == null)
+        {
+            return;
+        }
+
+        if (isPressed)
+        {
+            slidingDoor.OpenDoor();
+        }
+        else
+        {
+            slidingDoor.CloseDoor();
+        }
     }
 
     void OnCollisionEnter(Collision collision)
     {
         if (!isUnlocked)
         {
-            Debug.Log("Pressure plate is locked - press the button first");
             return;
         }
 
-        Rigidbody rb = collision.collider.GetComponent<Rigidbody>();
-
-        if (rb != null && rb.mass >= minimumMass)
+        if (collision.rigidbody == null || collision.rigidbody.mass < minimumMass)
         {
-            Debug.Log("Heavy object placed - opening door");
-
-            // Turn plate green to show it is activated
-            if (plateRenderer != null)
-            {
-                plateRenderer.material.color = Color.green;
-            }
-
-            // Open the door
-            if (slidingDoor != null)
-            {
-                slidingDoor.OpenDoor();
-            }
+            return;
         }
-        else
+
+        isPressed = true;
+
+        if (plateRenderer != null)
         {
-            Debug.Log("Object is too light for the pressure plate");
+            plateRenderer.material.color = Color.green;
         }
     }
 
     void OnCollisionExit(Collision collision)
     {
-        Rigidbody rb = collision.collider.GetComponent<Rigidbody>();
-
-        if (rb != null && rb.mass >= minimumMass)
+        if (!isUnlocked)
         {
-            // Turn plate back to red when object is removed
-            if (plateRenderer != null)
-            {
-                plateRenderer.material.color = Color.red;
-            }
+            return;
+        }
 
-            // Close the door if object is removed
-            if (slidingDoor != null)
-            {
-                slidingDoor.CloseDoor();
-            }
+        if (collision.rigidbody == null || collision.rigidbody.mass < minimumMass)
+        {
+            return;
+        }
+
+        isPressed = false;
+
+        if (plateRenderer != null)
+        {
+            plateRenderer.material.color = Color.green;
         }
     }
 }

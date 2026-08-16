@@ -4,11 +4,17 @@ public class ButtonInteract : MonoBehaviour
 {
     public bool isActivated = false;
     public PressurePlate pressurePlate;
+    public LiftingGlassWall glassWall;
     private Renderer buttonRenderer;
 
     void Start()
     {
         buttonRenderer = GetComponent<Renderer>();
+
+        if (pressurePlate != null)
+        {
+            pressurePlate.isUnlocked = true;
+        }
     }
 
     public void PressButton()
@@ -22,10 +28,14 @@ public class ButtonInteract : MonoBehaviour
             buttonRenderer.material.color = Color.green;
         }
 
-        // Unlock the pressure plate
         if (pressurePlate != null)
         {
             pressurePlate.isUnlocked = true;
+        }
+
+        if (glassWall != null)
+        {
+            glassWall.Lift();
         }
     }
 }

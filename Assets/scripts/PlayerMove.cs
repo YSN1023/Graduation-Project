@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     public float groundCheckDistance = 1.1f;
-
+    public bool canMove = true;
     [Header("Mouse Settings")]
     public float mouseSensitivity = 2f;
 
@@ -25,16 +25,27 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
     }
 
+    public void SetMovementLocked(bool locked)
+    {
+        canMove = !locked;
+    }
+
     void Update()
     {
-        HandleMouseLook();
-        HandleJump();
-        CheckGrounded();
+        if (canMove)
+        {
+            HandleMouseLook();
+            HandleJump();
+            CheckGrounded();
+        }
     }
 
     void FixedUpdate()
     {
-        HandleMovement();
+        if (canMove)
+            HandleMovement();
+        else
+            StopHorizontalMovement();
     }
 
     void HandleMouseLook()
@@ -61,6 +72,15 @@ public class PlayerMovement : MonoBehaviour
         // Keep existing Y velocity so gravity works normally
         moveDirection.y = rb.linearVelocity.y;
         rb.linearVelocity = moveDirection;
+    }
+
+    void StopHorizontalMovement()
+    {
+        // Called while movement is locked (e.g. rotation mode), so residual
+        // momentum from the moment R was pressed doesn't keep carrying the
+        // player sideways — Y velocity is preserved so gravity still applies.
+        Vector3 v = rb.linearVelocity;
+        rb.linearVelocity = new Vector3(0f, v.y, 0f);
     }
 
     void HandleJump()
